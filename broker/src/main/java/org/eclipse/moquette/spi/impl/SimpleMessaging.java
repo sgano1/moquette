@@ -122,8 +122,8 @@ public class SimpleMessaging implements IMessaging, EventHandler<ValueEvent> {
     }
     
     @Override
-    public void lostConnection(ServerChannel session, String clientID) {
-        disruptorPublish(new LostConnectionEvent(session, clientID));
+    public void lostConnection(String clientID) {
+        disruptorPublish(new LostConnectionEvent(clientID));
     }
 
     @Override
@@ -153,6 +153,7 @@ public class SimpleMessaging implements IMessaging, EventHandler<ValueEvent> {
     @Override
     public void onEvent(ValueEvent t, long l, boolean bln) throws Exception {
         MessagingEvent evt = t.getEvent();
+        t.setEvent(null); //free the reference to all Netty stuff
         LOG.info("onEvent processing messaging event from input ringbuffer {}", evt);
         if (evt instanceof StopEvent) {
             processStop();

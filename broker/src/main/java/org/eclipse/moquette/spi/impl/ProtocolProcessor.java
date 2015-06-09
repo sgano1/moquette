@@ -561,12 +561,12 @@ class ProtocolProcessor implements EventHandler<ValueEvent> {
     
     void processConnectionLost(LostConnectionEvent evt) {
         String clientID = evt.clientID;
-        if (m_clientIDs.containsKey(clientID)) {
-            if (!m_clientIDs.get(clientID).getSession().equals(evt.session)) {
-                LOG.info("Received a lost connection with client <{}> for a not matching session", clientID);
-                return;
-            }
-        }
+//        if (m_clientIDs.containsKey(clientID)) {
+//            if (!m_clientIDs.get(clientID).getSession().equals(evt.session)) {
+//                LOG.info("Received a lost connection with client <{}> for a not matching session", clientID);
+//                return;
+//            }
+//        }
 
         //If already removed a disconnect message was already processed for this clientID
         if (m_clientIDs.remove(clientID) != null) {
@@ -667,11 +667,15 @@ class ProtocolProcessor implements EventHandler<ValueEvent> {
     }
 
     public void onEvent(ValueEvent t, long l, boolean bln) throws Exception {
-        MessagingEvent evt = t.getEvent();
-        //It's always of type OutputMessagingEvent
-        OutputMessagingEvent outEvent = (OutputMessagingEvent) evt;
-        LOG.debug("Output event, sending {}", outEvent.getMessage());
-        outEvent.getChannel().write(outEvent.getMessage());
+        try {
+            MessagingEvent evt = t.getEvent();
+            //It's always of type OutputMessagingEvent
+            OutputMessagingEvent outEvent = (OutputMessagingEvent) evt;
+            LOG.debug("Output event, sending {}", outEvent.getMessage());
+            outEvent.getChannel().write(outEvent.getMessage());
+        } finally {
+            t.setEvent(null); //free the reference to all Netty stuff
+        }
     }
 
 }
